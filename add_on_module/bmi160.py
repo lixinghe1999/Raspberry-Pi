@@ -1,6 +1,6 @@
 import time
 from BMI160_i2c import Driver
-def bmi160_accsave(name, sample_rate=1600, t=5, port=0):
+def bmi160_accsave(loc, sample_rate=1600, t=5, port=0):
     sensor = Driver(0x69, port) #change address if needed
     if sample_rate == 1600:
         sensor.set_accel_rate(12)
@@ -10,7 +10,7 @@ def bmi160_accsave(name, sample_rate=1600, t=5, port=0):
     a = 0
     acc = ''
     time_start = time.time()
-    accwriter = open(name + '_' + str(time_start) + '.txt', 'w')
+    accwriter = open(loc + str(time_start) + '_'  + str(port) + '.txt', 'w')
     while (a < num):
         if sensor.getIntACCDataReadyStatus():
             try:
@@ -19,7 +19,7 @@ def bmi160_accsave(name, sample_rate=1600, t=5, port=0):
                 data = ''
             a = a + 1
             acc = str(data[0]) + ' ' + str(data[1]) + ' ' + str(data[2]) + ' ' + str(time.time()) + '\n'
-            accwriter.write(acc)    
+            accwriter.write(acc)        
     print('ACC port:', port, 'sample rate:', num / (time.time() - time_start))
 def bmi160_gyrosave(name, num, port):
     sensor = Driver(0x69, port)# change address if needed
