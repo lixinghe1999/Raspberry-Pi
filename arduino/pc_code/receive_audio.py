@@ -19,6 +19,9 @@ import serial
 import sys
 import time
 from struct import unpack
+import numpy as np
+from scipy.io.wavfile import write
+
 
 
 
@@ -32,7 +35,22 @@ from struct import unpack
                                                        
  """    
 
-
+def record_audio_wav(time_stamp,serial_port_name,sample_length): 
+    print("Start audio recording...")
+    ser = serial.Serial(serial_port_name, 115200, timeout=None)     # Create Serial link
+    data = bytearray()
+    samples = int(16000 * sample_length)
+    start_time = time.time()
+    for x in range(samples):
+      ser.read_until()
+      cc1 = ser.read(2)
+      data.extend(cc1)
+    print("Stop audio recording.")
+    print("audio:", time.time()-start_time) 
+    data = unpack('h'*(len(data)//2), data)
+    data = np.array(data, dtype=np.int16)
+    write("audio/" + time_stamp + ".wav", 16000, data)
+    ser.close() 
 def record_audio(time_stamp,serial_port_name,sample_length):
 
     #TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
@@ -79,21 +97,19 @@ def record_audio(time_stamp,serial_port_name,sample_length):
 if __name__ == '__main__':
     #Importing sys parameters
     
-
-    if sys.argv[1] == "linux":
-        print("TEST MODE audio !")
-        par_time_stamp = "test"
-        par_serial_port_name = "/dev/ttyACM0"
-        par_sample_length = 10
-    elif sys.argv[1] == "win":
-        print("TEST MODE audio !")
-        par_time_stamp = "test"
-        par_serial_port_name = "COM5"
-        par_sample_length = 5
-    else:
-        par_time_stamp = str(sys.argv[1])
-        par_serial_port_name = str(sys.argv[2])
-        par_sample_length = float(sys.argv[3])
+  par_time_stamp = str(time.time())
+  if sys.argv[1] == "linux":
+      print("TEST MODE audio !")
+      par_serial_port_name = "/dev/ttyACM0"
+      par_sample_length = 10
+  elif sys.argv[1] == "win":
+      print("TEST MODE audio !")
+      par_serial_port_name = "COM5"
+      par_sample_length = 5
+  else:
+      par_serial_port_name = str(sys.argv[2])
+      par_sample_length = float(sys.argv[3])
     
 
-    record_audio(par_time_stamp,par_serial_port_name,par_sample_length)
+  #record_audio(par_time_stamp,par_serial_port_name,par_sample_length)
+  record_audio_wav(par_time_stamp,par_serial_port_name,par_sample_length)
