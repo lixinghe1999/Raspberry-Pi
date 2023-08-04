@@ -21,7 +21,7 @@ import time
 from struct import unpack
 import numpy as np
 from scipy.io.wavfile import write
-
+import matplotlib.pyplot as plt
 
 
 
@@ -35,40 +35,35 @@ from scipy.io.wavfile import write
                                                        
  """    
 
-def record_audio_wav(time_stamp,serial_port_name,sample_length): 
+def record_audio_wav(time_stamp,serial_port_name, sample_rate=800, sample_length=5): 
     print("Start audio recording...")
     ser = serial.Serial(serial_port_name, 115200, timeout=None)     # Create Serial link
     data = bytearray()
-    samples = int(476 * sample_length)
+    samples = int(sample_rate * sample_length)
     start_time = time.time()
-    for x in range(samples):
-      ser.read_until()
-      cc1 = ser.read(2)
-      data.extend(cc1)
+    for i in range(samples):
+      #ser.read_until()
+      c = ser.read(2)
+      data.extend(c)
     print("Stop audio recording.")
-    print("audio:", time.time()-start_time) 
-    data = unpack('h'*(len(data)//2), data)
-    data = np.array(data, dtype=np.int16) / 32768.0
-    write("audio/" + time_stamp + ".wav", 472, data.astype(np.float32))
+    print("real sample rate:", i/(time.time()-start_time), 'expect sample rate:', sample_rate)
+    data = unpack('H'*(len(data)//2), data)
+    data = np.array(data, dtype=np.int32)/(32768.0*2)
+    print(data.shape, np.max(data), np.min(data))
+    write("audio/" + time_stamp + ".wav", sample_rate, data.astype(np.float32))
     ser.close() 
+    plt.plot(data)
+    plt.show()
 
 
 if __name__ == '__main__':
     #Importing sys parameters
     
   par_time_stamp = str(time.time())
+  par_sample_length = 5
   if sys.argv[1] == "linux":
-      print("TEST MODE audio !")
       par_serial_port_name = "/dev/ttyACM0"
-      par_sample_length = 10
   elif sys.argv[1] == "win":
-      print("TEST MODE audio !")
       par_serial_port_name = "COM5"
-      par_sample_length = 1
-  else:
-      par_serial_port_name = str(sys.argv[2])
-      par_sample_length = float(sys.argv[3])
     
-
-  #record_audio(par_time_stamp,par_serial_port_name,par_sample_length)
-  record_audio_wav(par_time_stamp,par_serial_port_name,par_sample_length)
+  record_audio_wav(par_time_stamp,par_serial_port_name, 800, par_sample_length)
