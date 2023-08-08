@@ -6,22 +6,25 @@
 #define GYR_CONF  0x21  //Page 93
 #define CMD       0x7E  //Page 65
 #define Interrupt 0x3B  //Page 111
-const int interruptPin = 2;
 
+const int interruptPin  = 2;  
 int16_t  x, y, z;
 int16_t data[8];
 volatile bool data_ready = false;
 uint8_t sampleBuffer_8bit[192];
 int sb_index = 0;
 void setup(void) {  
-  attachInterrupt(digitalPinToInterrupt(interruptPin), readAllAccel, CHANGE);
-  writeRegister16(Interrupt, 0x0400);//Setting accelerometer  
+
   Serial.begin(115200); 
   //Accelerometer
   Wire.begin();  
   Wire.setClock(400000);      // I2C Fast Mode (400kHz)  
   softReset();  
 
+  pinMode(interruptPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(interruptPin), readAllAccel, CHANGE);
+
+  writeRegister16(Interrupt, 0x0400); //Setting interrupt
   /*
    * Acc_Conf P.91
    * mode:        0x7000  -> High
@@ -48,22 +51,21 @@ void softReset(){
   writeRegister16(CMD, 0xDEAF);
   delay(50);    
 }
-
 void loop() {
   if (data_ready){
-  //if((readRegister16(0x02) & 0x80) == 0x00) {
-    readAllAccel();             // read all accelerometer/gyroscope/temperature data     
+  //if((readRegister16(0x02) & 0x80) != 0) {
+    readAllAccel();             // read all accelerometer   
 
     sampleBuffer_8bit[sb_index] = (x & 0xFF);
     sb_index ++;
     sampleBuffer_8bit[sb_index] = (x >> 8) & 0xFF;
     sb_index ++;
+    
     if (sb_index >= 192){
         Serial.write(sampleBuffer_8bit, sb_index);
         sb_index=0;
-        }   
-    data_ready = false;
-
+        } 
+    data_ready = false;  
   }
 }
 
@@ -84,12 +86,12 @@ uint16_t readRegister16(uint8_t reg) {
   Wire.write(reg);
   Wire.endTransmission(false);
   int n = Wire.requestFrom(INC_ADDRESS, 4);  
-  int i =0;
+  int i = 0;
   while(Wire.available()){
     data[i] = Wire.read();
     i++;
   }  
-  return (data[3]   | data[2] << 8);
+  return (data[2] | data[3] << 8);
 }
 
 //Read all axis
@@ -98,7 +100,7 @@ void readAllAccel() {
   Wire.write(0x03);
   Wire.endTransmission();
   Wire.requestFrom(INC_ADDRESS, 8);
-  int i =0;
+  int i = 0;
   while(Wire.available()){
     data[i] = Wire.read();
     i++;
@@ -110,5 +112,4 @@ void readAllAccel() {
   y =             (data[offset + 2]   | (int16_t )data[offset + 3] << 8);  //0x04
   z =             (data[offset + 4]   | (int16_t )data[offset + 5] << 8);  //0x05
   data_ready = true;
-
 }

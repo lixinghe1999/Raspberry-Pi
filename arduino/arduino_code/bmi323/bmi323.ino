@@ -13,6 +13,10 @@ uint8_t sampleBuffer_8bit[192];
 int sb_index = 0;
 void setup(void) {  
   Serial.begin(115200); 
+  while (!Serial) {
+      Serial.println("serial error"); // wait for serial port to connect. Needed for native USB
+  }
+  Serial.println("get started");
   //Accelerometer
   Wire.begin();  
   Wire.setClock(400000);      // I2C Fast Mode (400kHz)  
@@ -36,7 +40,7 @@ void setup(void) {
    * ODR:         0x000B  -> 800Hz
    * Total:       0x708B
    */
-  writeRegister16(GYR_CONF,0x708B);//Setting gyroscope    
+  // writeRegister16(GYR_CONF,0x708B);//Setting gyroscope    
 }
 
 void softReset(){  
@@ -45,23 +49,24 @@ void softReset(){
 }
 
 void loop() {
-
-  if((readRegister16(0x02) & 0x80) == 0x00) {
-    //Read ChipID   
+  if((readRegister16(0x02) & 0x80) != 0) {
     readAllAccel();             // read all accelerometer/gyroscope/temperature data     
-    // Serial.print(" \tx:");
-    // Serial.print(x);
-    // Serial.print(" \ty:");
-    // Serial.print(y);
-    // Serial.print(" \tz:");
-    // Serial.println(z);
 
-    // sampleBuffer_8bit[sb_index] = '\n';
-    // sb_index ++;
     sampleBuffer_8bit[sb_index] = (x & 0xFF);
     sb_index ++;
     sampleBuffer_8bit[sb_index] = (x >> 8) & 0xFF;
     sb_index ++;
+
+    sampleBuffer_8bit[sb_index] = (y & 0xFF);
+    sb_index ++;
+    sampleBuffer_8bit[sb_index] = (y >> 8) & 0xFF;
+    sb_index ++;
+
+    sampleBuffer_8bit[sb_index] = (z & 0xFF);
+    sb_index ++;
+    sampleBuffer_8bit[sb_index] = (z >> 8) & 0xFF;
+    sb_index ++;
+    
     if (sb_index >= 192){
         Serial.write(sampleBuffer_8bit, sb_index);
         sb_index=0;
@@ -86,12 +91,12 @@ uint16_t readRegister16(uint8_t reg) {
   Wire.write(reg);
   Wire.endTransmission(false);
   int n = Wire.requestFrom(INC_ADDRESS, 4);  
-  int i =0;
+  int i = 0;
   while(Wire.available()){
     data[i] = Wire.read();
     i++;
   }  
-  return (data[3]   | data[2] << 8);
+  return (data[2] | data[3] << 8);
 }
 
 //Read all axis
@@ -100,7 +105,7 @@ void readAllAccel() {
   Wire.write(0x03);
   Wire.endTransmission();
   Wire.requestFrom(INC_ADDRESS, 8);
-  int i =0;
+  int i = 0;
   while(Wire.available()){
     data[i] = Wire.read();
     i++;

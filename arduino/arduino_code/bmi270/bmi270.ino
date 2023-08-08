@@ -1,49 +1,57 @@
-/*
-  Arduino BMI270 - Simple Accelerometer
+#include <Wire.h> //I2C Arduino Library
 
-  This example reads the acceleration values from the BMI270
-  sensor and continuously prints them to the Serial Monitor
-  or Serial Plotter.
+#define address 0x69 //I2C 7bit address
 
-  The circuit:
-  - Arduino Nano 33 BLE Sense Rev2
+int response;
 
-  created 10 Jul 2019
-  by Riccardo Rizzo
-
-  This example code is in the public domain.
-*/
-
-#include "Arduino_BMI270_BMM150.h"
-
-void setup() {
+void setup(){
+  //Initialize Serial and I2C communications
   Serial.begin(9600);
-  while (!Serial);
-  Serial.println("Started");
+  Wire.begin();
+  delay(100);
+//  Wire.setClock(400000UL);
+ 
+// setting IMU270 in normal mode
+  // Wire.beginTransmission(address);  
+  // Wire.write(0x7D); //PWR_Control Register
+  // Wire.write(0x0E); // enable acquistion of acc,gyro and temp
+  // Wire.endTransmission();
+  //   delay(100);
 
-  if (!IMU.begin()) {
-    Serial.println("Failed to initialize IMU!");
-    while (1);
+  // Wire.beginTransmission(address);
+  // Wire.write(0x40);   // Acc config
+  // Wire.write(0xA8);   // 
+  // Wire.endTransmission();
+  // delay(100);
+
+  // Wire.beginTransmission(address);  
+  // Wire.write(0x42);   // Gyro config
+  // Wire.write(0xA9);
+  // Wire.endTransmission();
+  // delay(100);
+
+  // Wire.beginTransmission(address); // 
+  // Wire.write(0x7C);   // PWR config
+  // Wire.write(0x02);
+  // Wire.endTransmission();
+  // delay(100);
+
+//  Wire.beginTransmission(address); 
+//  Wire.write(0x7E);   // soft reset in CMD
+//  Wire.write(0xb6);
+//  Wire.endTransmission();
+}     
+
+void loop()
+{
+  Wire.beginTransmission(address);
+  Wire.write(0x10);    // reading LSB of Acc
+  Wire.endTransmission();
+  Wire.requestFrom(address, 2); 
+  if(2<= Wire.available())
+  {
+      response = Wire.read()|Wire.read()<<8;
   }
 
-  Serial.print("Accelerometer sample rate = ");
-  Serial.print(IMU.accelerationSampleRate());
-  Serial.println(" Hz");
-  Serial.println();
-  Serial.println("Acceleration in G's");
-  Serial.println("X\tY\tZ");
-}
-
-void loop() {
-  short x, y, z;
-
-  if (IMU.accelerationAvailable()) {
-    IMU.readRawAcceleration(x, y, z);
-
-    Serial.print(x);
-    Serial.print('\t');
-    Serial.print(y);
-    Serial.print('\t');
-    Serial.println(z);
-  }
+  Serial.println(response);
 }
