@@ -6,45 +6,40 @@
 #define GYR_CONF  0x21  //Page 93
 #define CMD       0x7E  //Page 65
 #define Interrupt 0x3B  //Page 111
+#define InterruptConf 0x38 // Page 105
 
 const int interruptPin  = 2;  
 int16_t  x, y, z;
-int16_t data[8];
-volatile bool data_ready = false;
-uint8_t sampleBuffer_8bit[192];
+// int16_t data[8];
+volatile bool data_ready;
+uint8_t sampleBuffer_8bit[1536];
 int sb_index = 0;
+
+void accel_drdy()
+{
+  data_ready = true;
+}
+
 void setup(void) {  
 
   Serial.begin(115200); 
+  Serial.println("get started!");
+
   //Accelerometer
   Wire.begin();  
-  Wire.setClock(400000);      // I2C Fast Mode (400kHz)  
+  Wire.setClock(1000000);      // I2C Fast Mode (400kHz)  
   softReset();  
 
-  pinMode(interruptPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(interruptPin), readAllAccel, CHANGE);
+  writeRegister16(InterruptConf, 0x0005); //
+  delay(50);    
 
   writeRegister16(Interrupt, 0x0400); //Setting interrupt
-  /*
-   * Acc_Conf P.91
-   * mode:        0x7000  -> High
-   * average:     0x0000  -> No
-   * filtering:   0x0080  -> ODR/4
-   * range:       0x0000  -> 2G
-   * ODR:         0x000B  -> 800Hz
-   * Total:       0x708B
-   */
-  writeRegister16(ACC_CONF,0x708D);//Setting accelerometer  
-  /*
-   * Gyr_Conf P.93
-   * mode:        0x7000  -> High
-   * average:     0x0000  -> No
-   * filtering:   0x0080  -> ODR/4
-   * range:       0x0000  -> 125kdps
-   * ODR:         0x000B  -> 800Hz
-   * Total:       0x708B
-   */
-  writeRegister16(GYR_CONF,0x708B);//Setting gyroscope    
+  delay(50);   
+
+  pinMode(interruptPin, INPUT);
+  attachInterrupt(digitalPinToInterrupt(interruptPin), accel_drdy, RISING);
+
+  writeRegister16(ACC_CONF,0x700D);//Setting accelerometer   
 }
 
 void softReset(){  
@@ -53,15 +48,24 @@ void softReset(){
 }
 void loop() {
   if (data_ready){
-  //if((readRegister16(0x02) & 0x80) != 0) {
     readAllAccel();             // read all accelerometer   
 
     sampleBuffer_8bit[sb_index] = (x & 0xFF);
     sb_index ++;
     sampleBuffer_8bit[sb_index] = (x >> 8) & 0xFF;
     sb_index ++;
+
+    sampleBuffer_8bit[sb_index] = (y & 0xFF);
+    sb_index ++;
+    sampleBuffer_8bit[sb_index] = (y >> 8) & 0xFF;
+    sb_index ++;
+
+    sampleBuffer_8bit[sb_index] = (z & 0xFF);
+    sb_index ++;
+    sampleBuffer_8bit[sb_index] = (z >> 8) & 0xFF;
+    sb_index ++;
     
-    if (sb_index >= 192){
+    if (sb_index >= 1536){
         Serial.write(sampleBuffer_8bit, sb_index);
         sb_index=0;
         } 
@@ -87,11 +91,9 @@ uint16_t readRegister16(uint8_t reg) {
   Wire.endTransmission(false);
   int n = Wire.requestFrom(INC_ADDRESS, 4);  
   int i = 0;
-  while(Wire.available()){
-    data[i] = Wire.read();
-    i++;
-  }  
-  return (data[2] | data[3] << 8);
+  Wire.read();
+  Wire.read();
+  return (Wire.read() | Wire.read() << 8);
 }
 
 //Read all axis
@@ -100,16 +102,9 @@ void readAllAccel() {
   Wire.write(0x03);
   Wire.endTransmission();
   Wire.requestFrom(INC_ADDRESS, 8);
-  int i = 0;
-  while(Wire.available()){
-    data[i] = Wire.read();
-    i++;
-  }
-
-  //Offset = 2 because the 2 first bytes are dummy (useless)
-  int offset = 2;  
-  x =             (data[offset + 0]   | (int16_t )data[offset + 1] << 8);  //0x03
-  y =             (data[offset + 2]   | (int16_t )data[offset + 3] << 8);  //0x04
-  z =             (data[offset + 4]   | (int16_t )data[offset + 5] << 8);  //0x05
-  data_ready = true;
+  Wire.read();
+  Wire.read();
+  x = (Wire.read() | Wire.read() << 8);
+  y = (Wire.read() | Wire.read() << 8);
+  z = (Wire.read() | Wire.read() << 8);
 }

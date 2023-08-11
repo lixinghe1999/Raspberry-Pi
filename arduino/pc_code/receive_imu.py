@@ -54,7 +54,7 @@ def record_audio_wav(serial_port_name, sample_rate=800, sample_length=5, channel
     print("Stop imu recording.")
     print("real sample rate:", i/(time.time()-start_time), 'expect sample rate:', sample_rate)
     data = unpack('h'*(len(data)//2), data)
-    data = (np.array(data, dtype=np.int32)/(32768.0)).reshape(-1, channel)
+    data = np.array(data, dtype=np.int16).reshape(-1, channel)
     write("imu/" + str(start_time) + ".wav", sample_rate, data.astype(np.float32))
     ser.close() 
     plt.plot(data)
@@ -64,9 +64,11 @@ def record_audio_wav(serial_port_name, sample_rate=800, sample_length=5, channel
 if __name__ == '__main__':
   #Importing sys parameters  
   par_sample_length = 5
+  channel = 3
+  sample_rate = 1600
   if sys.argv[1] == "linux":
       par_serial_port_name = "/dev/ttyACM0"
   elif sys.argv[1] == "win":
-      par_serial_port_name = "COM5"
+      par_serial_port_name = "COM11"
     
-  record_audio_wav(par_serial_port_name, 1600, par_sample_length, 3)
+  record_audio_wav(par_serial_port_name, sample_rate, par_sample_length, channel)
