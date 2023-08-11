@@ -21,6 +21,7 @@ import time
 from struct import unpack
 import numpy as np
 from scipy.io.wavfile import write
+import matplotlib.pyplot as plt
 
 
 
@@ -35,11 +36,11 @@ from scipy.io.wavfile import write
                                                        
  """    
 
-def record_audio_wav(serial_port_name,sample_length): 
+def record_audio_wav(serial_port_name,sample_length,sample_rate): 
     ser = serial.Serial(serial_port_name, 115200, timeout=1)     # Create Serial link
     time.sleep(0.5) # important! allow some time for the Arduino to fully reset
     data = bytearray()
-    samples = int(16000 * sample_length)
+    samples = int(sample_rate * sample_length)
     print("try one sample...")
     c = ser.read(2)
     if len(c) == 0:
@@ -52,19 +53,22 @@ def record_audio_wav(serial_port_name,sample_length):
       c = ser.read(2)
       data.extend(c)
     print("Stop audio recording.")
-    print("audio:", time.time()-start_time) 
+    print("real sample rate:", samples /(time.time()-start_time), 'expect sample rate:', sample_rate) 
     data = unpack('h'*(len(data)//2), data)
     data = np.array(data, dtype=np.int16)
     write("audio/" + str(start_time) + ".wav", 16000, data)
     ser.close() 
+    plt.plot(data)
+    plt.show()
 
 
 if __name__ == '__main__':
   par_sample_length = 5
+  sample_rate = 8000
   if sys.argv[1] == "linux":
       par_serial_port_name = "/dev/ttyACM0"
   elif sys.argv[1] == "win":
       par_serial_port_name = "COM11"
   
   #record_audio(par_time_stamp,par_serial_port_name,par_sample_length)
-  record_audio_wav(par_serial_port_name,par_sample_length)
+  record_audio_wav(par_serial_port_name,par_sample_length, sample_rate)
