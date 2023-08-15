@@ -41,7 +41,7 @@ dtparam=i2c0_baudrate=1000000
 
 2. Arduino BLE Sense Nano Rev2: IMU is updated to BMI270 (finished, at arduino/arduino_code/bmi270.ino)
 
-3. Serial data for two sensors: /arduino/receive.py (still working on it)
+3. Serial data for two sensors: /arduino/receive.py (still working on it) next step: interrupt + FIFO to reach stable sample rate without loss
 
 4. [Arduino work on BMI323 (New IMU 2023)](https://forum.arduino.cc/t/using-bmi323-with-i-c/1092880), [Mouser](https://www.mouser.hk/ProductDetail/Bosch-Sensortec/Shuttle-Board-3.0-BMI323?qs=By6Nw2ByBD2%252BWPBpp%2Fi%252BOg%3D%3D). 
 You may need 1.27mm to 2.54mm adaptor to connect.

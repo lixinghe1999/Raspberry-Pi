@@ -13,6 +13,7 @@ void setup(){
 
 void loop() {
   if (samplesRead) {
+    // Serial.println(samplesRead); actually samplesRead is always 256
     for (int i = 0; i < samplesRead; i=i+1) {
       sampleBuffer_mic[mic_index] = (sampleBuffer[i] >> 8) & 0xFF;
       mic_index ++;
@@ -23,10 +24,9 @@ void loop() {
         Serial.write((uint8_t)'\n');
         Serial.write((uint8_t)0x01);
         Serial.write(sampleBuffer_mic, mic_index);
-        //Serial.write('>');
         mic_index=0;
         }
-  }
+    }
     samplesRead = 0;
   }
   read_imu();
