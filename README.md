@@ -37,11 +37,11 @@ dtparam=i2c0_baudrate=1000000
  ## Arduino earphone
 <span id="earphone">
 
-1. [Arduino BLE Sense Nano microphone recording](https://github.com/macca0612/Audio-based-classification-with-TinyML-on-embeddeddevice) Note that the data from serial should be converted to short (16-bit)
+1. [Arduino BLE Sense Nano microphone recording](https://github.com/macca0612/Audio-based-classification-with-TinyML-on-embeddeddevice) Note that the data from serial should be converted to short (16-bit) + 8000 sample rate (HFS profile)
 
-2. Arduino BLE Sense Nano Rev2: IMU is updated to BMI270
+2. Arduino BLE Sense Nano Rev2: IMU is updated to BMI270 (finished, at arduino/arduino_code/bmi270.ino)
 
-3. Serial data for two sensors: pending
+3. Serial data for two sensors: /arduino/receive.py (still working on it)
 
 4. [Arduino work on BMI323 (New IMU 2023)](https://forum.arduino.cc/t/using-bmi323-with-i-c/1092880), [Mouser](https://www.mouser.hk/ProductDetail/Bosch-Sensortec/Shuttle-Board-3.0-BMI323?qs=By6Nw2ByBD2%252BWPBpp%2Fi%252BOg%3D%3D). 
 You may need 1.27mm to 2.54mm adaptor to connect.
@@ -53,7 +53,7 @@ You may need 1.27mm to 2.54mm adaptor to connect.
 
 1. [OpenBCI-earable](https://github.com/MKnierim/openbci-headphones)
 
-2. EMOTIV
+2. EMOTIV, IDUN ....
  </span>
 
  ## Multi-modal
@@ -75,6 +75,8 @@ I list all the multi-modal tasks worth exploring.
 2. Full earphone
 
 3. Bio-sensing earphone
+
+4. out-eardrum earphone
 
  </span>
 
