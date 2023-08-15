@@ -7,7 +7,7 @@ int mic_index, imu_index;
 
 void setup(){
   mic_setup();
-  //imu_setup();
+  imu_setup();
 }
 
 
@@ -20,13 +20,16 @@ void loop() {
       mic_index ++;
       //Sending data via SerialUSB
       if (mic_index >= 512){
+        Serial.write((uint8_t)'\n');
+        Serial.write((uint8_t)0x01);
         Serial.write(sampleBuffer_mic, mic_index);
+        //Serial.write('>');
         mic_index=0;
         }
   }
     samplesRead = 0;
   }
-  //read_imu();
+  read_imu();
 }
 void read_imu(){
 if ((readRegister8(0x03) & 0x80) != 0)
@@ -47,6 +50,8 @@ if ((readRegister8(0x03) & 0x80) != 0)
     
     
     if (imu_index >= 192){
+        Serial.write((uint8_t)'\n');
+        Serial.write((uint8_t)0x00);
         Serial.write(sampleBuffer_imu, imu_index);
         imu_index=0;
         }   

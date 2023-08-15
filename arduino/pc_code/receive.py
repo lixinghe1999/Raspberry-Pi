@@ -51,7 +51,7 @@ def record(serial_port_name, sample_rate=800, sample_length=5, channel=1, sensor
     for i in range(samples):
       c = ser.read(2 * channel)
       data.extend(c)
-    print("Stop imu recording.")
+    print("Stop recording.")
     print("real sample rate:", i/(time.time()-start_time), 'expect sample rate:', sample_rate)
     data = unpack('h'*(len(data)//2), data)
     data = np.array(data, dtype=np.int16).reshape(-1, channel)
@@ -61,14 +61,15 @@ def record(serial_port_name, sample_rate=800, sample_length=5, channel=1, sensor
         plt.plot(data)
         plt.show()
 
-def simultaneous_record(serial_port_name, sample_rate=800, sample_length=5, channel=1, sensor='A', plot=False): 
+def simultaneous_record(serial_port_name, sample_rate=[1600, 8000], sample_length=5, channel=[3, 1], sensor='AM', plot=False): 
     '''
     This function records data from serial port and save it as a wav file.
     '''
     ser = serial.Serial(serial_port_name, 115200, timeout=1)     # Create Serial link
     time.sleep(0.5) # important! allow some time for the Arduino to fully reset
-    data = bytearray()
-    samples = int(sample_rate * sample_length)
+    data = [bytearray(), bytearray()]
+    samples = [int(sr * sample_length) for sr in sample_rate]
+    buffer = [192, 512]
     print("try one sample...")
     c = ser.read(2)
     if len(c) == 0:
@@ -77,17 +78,30 @@ def simultaneous_record(serial_port_name, sample_rate=800, sample_length=5, chan
 
     print("Start recording...")
     start_time = time.time()
-    for i in range(samples):
-      c = ser.read(2 * channel)
-      data.extend(c)
-    print("Stop imu recording.")
-    print("real sample rate:", i/(time.time()-start_time), 'expect sample rate:', sample_rate)
-    data = unpack('h'*(len(data)//2), data)
-    data = np.array(data, dtype=np.int16).reshape(-1, channel)
-    write(sensor + '/' + str(start_time) + ".wav", sample_rate, data)
+    i = 0; j = 0
+    while (i <= samples[0] or j <= samples[1]):
+      ser.read_until()
+      id = ser.read(1)
+      if id == b'\x00':
+        c = ser.read(buffer[0])
+        i += len(c)//6
+        data[0].extend(c)
+      elif id == b'\x01':
+        c = ser.read(buffer[1])
+        j += len(c)//2
+        data[1].extend(c)
+    print("Stop recording.")
+    print("real sample rate:", i/(time.time()-start_time), j/(time.time()-start_time), 'expect sample rate:', sample_rate)
+    for i in range(2):
+      data[i] = unpack('h'*(len(data[i])//2), data[i])
+      data[i]  = np.array(data[i] , dtype=np.int16).reshape(-1, channel[i])
+    write(sensor + '/A_' + str(start_time) + ".wav", sample_rate[0], data[0])
+    write(sensor + '/M_' + str(start_time) + ".wav", sample_rate[1], data[1])
     ser.close() 
     if plot:
-        plt.plot(data)
+        fig, axs = plt.subplots(2, 1)
+        axs[0].plot(data[0])
+        axs[1].plot(data[1])
         plt.show()
 
 
@@ -97,13 +111,19 @@ if __name__ == '__main__':
     parser.add_argument('--time', '-t', action = "store", type=int, default=5, required=False, help='time of data recording')    
     parser.add_argument('--sensor', '-s', action = "store", type=str, default='A', required=False, help='A, M or AM')    
     parser.add_argument('--port', '-p', action = "store", type=str, default='COM11', required=False, help='serial port name')
-    # "/dev/ttyACM0" for linux??
+    # "/dev/ttyACM0" for linux
+    # "/dev/cu.usbmodem1401" for mac os
     args = parser.parse_args()
     if args.sensor == 'A':
         sample_rate = 1600
         channel = 3
+        record(args.port, sample_rate, args.time, channel, args.sensor, True)
     elif args.sensor == 'M':
         sample_rate = 8000
         channel = 1
-        
-    record(args.port, sample_rate, args.time, channel, args.sensor, True)
+        record(args.port, sample_rate, args.time, channel, args.sensor, True)
+    else: # sensor = 'AM'
+        sample_rate = [1600, 8000]
+        channel = [3, 1]        
+        simultaneous_record(args.port, sample_rate, args.time, channel, 'AM', True)
+    

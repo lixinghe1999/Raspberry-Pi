@@ -3,3 +3,4 @@
 *.pyc
 *.wav
 *.mp3
+.DS_Store
