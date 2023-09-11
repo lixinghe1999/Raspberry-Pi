@@ -91,7 +91,7 @@ def simultaneous_record(serial_port_name, sample_rate=[1600, 8000], sample_lengt
         j += len(c)//2
         data[1].extend(c)
     print("Stop recording.")
-    print("real sample rate:", i/(time.time()-start_time), j/(time.time()-start_time), 'expect sample rate:', sample_rate)
+    print("real sample rate:", [i/(time.time()-start_time), j/(time.time()-start_time)], 'expect sample rate:', sample_rate)
     for i in range(2):
       data[i] = unpack('h'*(len(data[i])//2), data[i])
       data[i]  = np.array(data[i] , dtype=np.int16).reshape(-1, channel[i])
