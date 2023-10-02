@@ -3,8 +3,8 @@ import numpy as np
 from scipy import signal
 import librosa
 import matplotlib.pyplot as plt
-
-if __name__ == "__main__":
+from scipy.io.wavfile import write
+def verify():
     b1, a1 = signal.butter(4, 800, 'lowpass', fs=8000)
     b2, a2 = signal.butter(4, 80, 'highpass', fs=1600)
 
@@ -40,4 +40,11 @@ if __name__ == "__main__":
             axs[3].imshow(np.mean(acc_spec, axis=0))
             axs[4].imshow(mic_spec)
             plt.show()
-        
+def save_chirp():
+    chirp_signal = librosa.chirp(fmin=100, fmax=1000, sr=16000, duration=5, linear=True,)
+    write("chirp.wav", 16000, chirp_signal)
+
+if __name__ == "__main__":
+
+    # save_chirp()
+    verify()

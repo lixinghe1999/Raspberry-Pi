@@ -9,17 +9,16 @@ import time
 
 fs = 48000  # Sample rate
 
-def start():
+def start(duration=20):
     global myrecording
-    myrecording = sd.rec(int(20 * fs), samplerate=fs, channels=2)
-
+    myrecording = sd.rec(int(duration * fs), samplerate=fs, channels=2)
 def record(fname, duration, plot=False):
     global myrecording
     sd.stop()
     myrecording = myrecording[:fs * duration, :]
     write(fname, fs, myrecording)  # Save as WAV file
-    myrecording = myrecording.T
     if plot:
+        myrecording = myrecording.T
         mel_spec = librosa.feature.melspectrogram(y=myrecording, sr=fs, n_mels=80)
         fig, axs = plt.subplots(2, 2)
         axs[0, 0].plot(myrecording[0, :])
