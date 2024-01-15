@@ -3,5 +3,6 @@
 *.pyc
 *.wav
 *.mp3
+*.zip
 .DS_Store
 V2S Demo - Voice Vibration Sensor Evaluation Tool
