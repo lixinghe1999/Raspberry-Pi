@@ -4,5 +4,5 @@
 *.wav
 *.mp3
 *.zip
+benchmark/smartphone/data
 .DS_Store
-V2S Demo - Voice Vibration Sensor Evaluation Tool
