@@ -5,6 +5,7 @@ import android.media.AudioRecord;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -63,6 +64,8 @@ public class PlayRecord {
         File f2 = new File(file_name + ".wav"); // The location where you want your WAV file
         try {
             rawToWave(f1, f2);
+            boolean deleted = f1.delete();
+            Log.d("delete the pcm file", "" + deleted);
         } catch (IOException e) {
             e.printStackTrace();
         }
