@@ -29,6 +29,9 @@ import com.otaliastudios.cameraview.controls.Flash;
 import com.otaliastudios.cameraview.controls.Mode;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private Sensor accelerometerSensor;
     private Sensor gyroscopeSensor;
 
-    private Button btn_imu, btn_back, btn_mic, btn_front;
+    private Button btn_imu, btn_back, btn_mic, btn_front, btn_unlock, btn_lock;
     private EditText edt_path;
     private TextView tv_state;
     private TextView tv_record;
@@ -66,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
         btn_back.setOnClickListener(back_listener);
         btn_mic.setOnClickListener(mic_listener);
         btn_front.setOnClickListener(front_listener);
+        btn_unlock.setOnClickListener(unlock_listener);
+        btn_lock.setOnClickListener(lock_listener);
+
 
         camera = findViewById(R.id.camera);
         camera.setLifecycleOwner(this);
@@ -98,6 +104,9 @@ public class MainActivity extends AppCompatActivity {
         btn_back = findViewById(R.id.btn_back);
         btn_mic = findViewById(R.id.btn_mic);
         btn_front = findViewById(R.id.btn_front);
+        btn_unlock = findViewById(R.id.btn_unlock);
+        btn_lock = findViewById(R.id.btn_lock);
+
         permissionCheck();
     }
 
@@ -127,6 +136,13 @@ public class MainActivity extends AppCompatActivity {
                     REQ_CODE_PERMISSION_SENSOR);
         }
     }
+    private String timestamp(){
+        long currentTimestamp = System.currentTimeMillis();
+        DateFormat dateFormat = new SimpleDateFormat("HH_mm_ss");
+        Date date = new Date(currentTimestamp);
+        String dateString = dateFormat.format(date);
+        return dateString;
+    }
     private View.OnClickListener mic_listener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -154,7 +170,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
-
     private View.OnClickListener back_listener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -257,6 +272,116 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "传感器数据保存失败", Toast.LENGTH_SHORT).show();
                 SensorData.clear();
                 btn_imu.setText("IMU");
+                tv_state.setText("点击按钮开始采集\n");
+            }
+
+        }
+    };
+    private View.OnClickListener unlock_listener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if(edt_path.getText().toString().equals("") ||
+                    edt_path.getText().toString() == null) {
+                Toast.makeText(MainActivity.this, "path ID 不能为空", Toast.LENGTH_SHORT).show();
+            }
+            else if(btn_unlock.getText().toString().equals("Unlock")){
+                camera.close();
+                file_name = edt_path.getText().toString() + "-" + timestamp();
+
+                if(!sensorManager.registerListener(sensorListener, accelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST ))
+                    Toast.makeText(MainActivity.this, "加速度传感器不可用", Toast.LENGTH_SHORT).show();
+                if(!sensorManager.registerListener(sensorListener, gyroscopeSensor, SensorManager.SENSOR_DELAY_FASTEST))
+                    Toast.makeText(MainActivity.this, "陀螺仪不可用", Toast.LENGTH_SHORT).show();
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
+                }
+                FileUtil.saveSensorData(file_name + ".csv", SensorData.getFileHead());
+                ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
+                future = service.scheduleAtFixedRate(new DataSaveTask(file_name + ".csv"), 5, 5, TimeUnit.SECONDS);
+
+                playrecorder = new PlayRecord();
+                playrecorder.startRecording(file_path + file_name);
+                tv_state.setText("传感器数据正在采集中\n" + "当前采集路径为: " + edt_path.getText().toString());
+
+                btn_unlock.setText("stop");
+            }
+            else{
+                playrecorder.stopRecording(file_path + file_name);
+
+                future.cancel(true);
+                sensorManager.unregisterListener(sensorListener);
+
+                if(FileUtil.saveSensorData(file_name + ".csv", SensorData.getAccGyroDataStr())){
+                    cap_records = file_name;
+                    tv_record.setText(cap_records);
+                    tv_state.setText("");
+                    Toast.makeText(MainActivity.this, "传感器数据保存成功", Toast.LENGTH_SHORT).show();
+                }
+                else
+                    Toast.makeText(MainActivity.this, "传感器数据保存失败", Toast.LENGTH_SHORT).show();
+                SensorData.clear();
+
+                btn_unlock.setText("Unlock");
+                tv_state.setText("点击按钮开始采集\n");
+            }
+
+        }
+    };
+    private View.OnClickListener lock_listener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if(edt_path.getText().toString().equals("") ||
+                    edt_path.getText().toString() == null) {
+                Toast.makeText(MainActivity.this, "path ID 不能为空", Toast.LENGTH_SHORT).show();
+            }
+            else if(btn_lock.getText().toString().equals("Lock")){
+                file_name = edt_path.getText().toString() + "-" + timestamp();
+                camera.open();
+                camera.setFacing(Facing.FRONT);
+                camera.setMode(Mode.VIDEO);
+                camera.takeVideo(new File(file_path + file_name + ".mp4"));
+
+                if(!sensorManager.registerListener(sensorListener, accelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST ))
+                    Toast.makeText(MainActivity.this, "加速度传感器不可用", Toast.LENGTH_SHORT).show();
+                if(!sensorManager.registerListener(sensorListener, gyroscopeSensor, SensorManager.SENSOR_DELAY_FASTEST))
+                    Toast.makeText(MainActivity.this, "陀螺仪不可用", Toast.LENGTH_SHORT).show();
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
+                }
+                FileUtil.saveSensorData(file_name + ".csv", SensorData.getFileHead());
+                ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
+                future = service.scheduleAtFixedRate(new DataSaveTask(file_name + ".csv"), 5, 5, TimeUnit.SECONDS);
+//
+//                playrecorder = new PlayRecord();
+//                playrecorder.startRecording(file_path + file_name);
+//                tv_state.setText("传感器数据正在采集中\n" + "当前采集路径为: " + edt_path.getText().toString());
+
+                btn_lock.setText("stop");
+            }
+            else{
+                camera.stopVideo();
+                camera.close();
+
+//                playrecorder.stopRecording(file_path + file_name);
+
+                future.cancel(true);
+                sensorManager.unregisterListener(sensorListener);
+
+                if(FileUtil.saveSensorData(file_name + ".csv", SensorData.getAccGyroDataStr())){
+                    cap_records = file_name;
+                    tv_record.setText(cap_records);
+                    tv_state.setText("");
+                    Toast.makeText(MainActivity.this, "传感器数据保存成功", Toast.LENGTH_SHORT).show();
+                }
+                else
+                    Toast.makeText(MainActivity.this, "传感器数据保存失败", Toast.LENGTH_SHORT).show();
+                SensorData.clear();
+
+                btn_lock.setText("Lock");
                 tv_state.setText("点击按钮开始采集\n");
             }
 

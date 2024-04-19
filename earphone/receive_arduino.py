@@ -108,14 +108,14 @@ def simultaneous_record(serial_port_name, sample_rate=[1600, 8000], sample_lengt
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('--time', '-t', action = "store", type=int, default=5, required=False, help='time of data recording')    
+    parser.add_argument('--time', '-t', action = "store", type=int, default=2, required=False, help='time of data recording')    
     parser.add_argument('--sensor', '-s', action = "store", type=str, default='A', required=False, help='A, M or AM')    
-    parser.add_argument('--port', '-p', action = "store", type=str, default='COM14', required=False, help='serial port name')
+    parser.add_argument('--port', '-p', action = "store", type=str, default='COM10', required=False, help='serial port name')
     # "/dev/ttyACM0" for linux
     # "/dev/cu.usbmodem1401" for mac os
     args = parser.parse_args()
     if args.sensor == 'A':
-        sample_rate = 1600
+        sample_rate = 800
         channel = 3
         record(args.port, sample_rate, args.time, channel, args.sensor, True)
     elif args.sensor == 'M':

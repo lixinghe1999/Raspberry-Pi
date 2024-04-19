@@ -113,7 +113,9 @@ public class SensorListener implements SensorEventListener{
         }
 
         public String getCurrentTime(){
-            return new SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(new Date());
+            //return new SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(new Date());
+            long startTime = System.nanoTime();
+            return ""+startTime;
         }
 
 }
