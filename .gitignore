@@ -4,5 +4,7 @@
 *.wav
 *.mp3
 *.zip
+*.npy
+*.png
 benchmark/smartphone/data
 .DS_Store
