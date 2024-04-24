@@ -31,7 +31,7 @@ import argparse
  |_|   \__,_|_|  \__,_|_| |_| |_|\___|\__\___|_|  |___/
                                                        
  """    
-def record(serial_port_name, sample_rate=800, sample_length=5, channel=1, sensor='A', plot=False): 
+def record(serial_port_name, sample_rate=800, sample_length=5, channel=1, sensor='A', plot=False, format='numpy'): 
     '''
     This function records data from serial port and save it as a wav file.
     '''
@@ -47,6 +47,7 @@ def record(serial_port_name, sample_rate=800, sample_length=5, channel=1, sensor
 
     print("Start recording...")
     start_time = time.time()
+    ser.flush() # clear buffer
     for i in range(samples):
       c = ser.read(2 * channel)
       data.extend(c)
@@ -57,7 +58,7 @@ def record(serial_port_name, sample_rate=800, sample_length=5, channel=1, sensor
     data = np.array(data, dtype=np.int16).reshape(-1, channel)
 
     save_name = sensor + '/' + str(start_time) + "_" + str(int(real_sample_rate))
-    if args.format == 'numpy':
+    if format == 'numpy':
         np.save(save_name + ".npy", data)
     else:
         write(save_name + ".wav", sample_rate, data)
@@ -126,7 +127,7 @@ if __name__ == '__main__':
     parser.add_argument('--time', '-t', action = "store", type=int, default=5, required=False, help='time of data recording')    
     parser.add_argument('--sensor', '-s', action = "store", type=str, default='A', required=False, help='A, M or AM')    
     parser.add_argument('--port', '-p', action = "store", type=str, default='COM13', required=False, help='serial port name')
-    parser.add_argument('--format', '-f', action = "store", type=str, default='wav', choices=['numpy', 'wav'], required=False)
+    parser.add_argument('--format', '-f', action = "store", type=str, default='numpy', choices=['numpy', 'wav'], required=False)
 
     # "/dev/ttyACM0" for linux
     # "/dev/cu.usbmodem1401" for mac os
@@ -134,13 +135,13 @@ if __name__ == '__main__':
     if args.sensor == 'A':
         sample_rate = 104
         channel = 6
-        record(args.port, sample_rate, args.time, channel, args.sensor, True)
+        record(args.port, sample_rate, args.time, channel, args.sensor, True, args.format)
     elif args.sensor == 'M':
         sample_rate = 8000
         channel = 1
-        record(args.port, sample_rate, args.time, channel, args.sensor, True)
+        record(args.port, sample_rate, args.time, channel, args.sensor, True, args.format)
     else: # sensor = 'AM'
         sample_rate = [1600, 8000]
         channel = [3, 1]        
-        simultaneous_record(args.port, sample_rate, args.time, channel, 'AM', True)
+        simultaneous_record(args.port, sample_rate, args.time, channel, 'AM', True, args.format)
     
