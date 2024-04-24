@@ -3,12 +3,12 @@ import scipy.signal as signal
 import scipy.io.wavfile as wavfile
 import matplotlib.pyplot as plt
 # Parameters
-total_duration = 1.0  # Total duration of the signal in seconds
-pulse_duration = 0.04  # Duration of each pulse in seconds
+total_duration = 2  # Total duration of the signal in seconds
+pulse_duration = 2 # Duration of each pulse in seconds
 pulse_interval = 0.0  # Time interval between pulses in seconds
 sample_rate = 48000  # Sample rate in Hz
-start_freq = [17500, 21000]  # Starting frequency in Hz
-end_freq = [20500, 23500]  # Ending frequency in Hz
+start_freq = [20, ]  # Starting frequency in Hz
+end_freq = [20000]  # Ending frequency in Hz
 
 
 assert len(start_freq) == len(end_freq)
@@ -29,4 +29,4 @@ for i in range(num_pulse):
     start_idx = int(i * (pulse_duration + pulse_interval) * sample_rate)
     end_idx = int((i + 1) * (pulse_duration + pulse_interval) * sample_rate)
     data[:, start_idx:end_idx] = chirp
-wavfile.write('output.wav', sample_rate, data.T)
+wavfile.write('fmcw.wav', sample_rate, data.T)
