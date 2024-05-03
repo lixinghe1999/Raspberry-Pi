@@ -6,5 +6,6 @@
 *.zip
 *.npy
 *.png
+*.mp4
 benchmark/smartphone/data
 .DS_Store
