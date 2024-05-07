@@ -125,7 +125,11 @@ def simultaneous_record(serial_port_name, sample_rate=[1600, 8000], sample_lengt
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some integers.')
+<<<<<<< HEAD
     parser.add_argument('--time', '-t', action = "store", type=int, default=2, required=False, help='time of data recording')    
+=======
+    parser.add_argument('--time', '-t', action = "store", type=int, default=10, required=False, help='time of data recording')    
+>>>>>>> 39e21974d7f72e437a2abc839d3bf8c84b048c94
     parser.add_argument('--sensor', '-s', action = "store", type=str, default='A', required=False, help='A, M or AM')    
     parser.add_argument('--port', '-p', action = "store", type=str, default='COM13', required=False, help='serial port name')
     parser.add_argument('--format', '-f', action = "store", type=str, default='wav', choices=['numpy', 'wav'], required=False)

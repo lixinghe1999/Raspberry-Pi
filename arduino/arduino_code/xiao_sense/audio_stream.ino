@@ -18,7 +18,11 @@ void mic_setup() {
 
   // Optionally set the gain
   // Defaults to 20 on the BLE Sense and 24 on the Portenta Vision Shield
+<<<<<<< HEAD
    PDM.setGain(30);
+=======
+   PDM.setGain(5);
+>>>>>>> 39e21974d7f72e437a2abc839d3bf8c84b048c94
 
 
   if (!PDM.begin(channels, frequency)) {

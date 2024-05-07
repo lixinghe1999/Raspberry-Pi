@@ -1,6 +1,10 @@
 #include "audio_stream.h"
 #include "imu_nrfsense.h"
+<<<<<<< HEAD
 uint8_t sampleBuffer_mic[256], sampleBuffer_8bit[256];
+=======
+uint8_t sampleBuffer_mic[512], sampleBuffer_8bit[256];
+>>>>>>> 39e21974d7f72e437a2abc839d3bf8c84b048c94
 int buffer_len=256;
 int mic_index, sb_index;
 
@@ -19,7 +23,11 @@ void loop() {
       mic_index ++;
       sampleBuffer_mic[mic_index] = (sampleBuffer[i] & 0xFF);
       mic_index ++;
+<<<<<<< HEAD
       if (mic_index >= buffer_len){
+=======
+      if (mic_index >= 512){
+>>>>>>> 39e21974d7f72e437a2abc839d3bf8c84b048c94
         Serial.write((uint8_t)'\n');
         Serial.write((uint8_t)0x01);
         Serial.write(sampleBuffer_mic, mic_index);
