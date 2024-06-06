@@ -24,10 +24,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     output_file = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
-    command_array = 'arecord -Dac108 -f S32_LE -r 16000 -c 8 -d {} {}.wav'.format(args.duration, output_file + '_micarray')
-    command_earphone = 'arecord -Dhw:1,0 -f S32_LE -r 16000 -c 2 -d {} {}.wav'.format(args.duration, output_file + '_earphone')
-    subprocess.run(['python3' + command_array])
-    subprocess.run(['python3' + command_earphone])
+    command_array = "arecord -Dac108 -f S32_LE -r 16000 -c 8 -d {} {}.wav".format(args.duration, output_file + '_micarray')
+    command_earphone = "arecord -Dhw:1,0 -f S32_LE -r 16000 -c 2 -d {} {}.wav".format(args.duration, output_file + '_earphone')
+    subprocess.run([command_array])
+    subprocess.run([command_earphone])
 
 #     from multiprocessing import Process
 #    
