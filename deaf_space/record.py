@@ -1,5 +1,5 @@
 import sounddevice as sd
-from receive_arduino import record as record_imu
+# from receive_arduino import record as record_imu
 from receive_sounddevice import record as record_audio
 def record(output_file, recording_duration=5):
     # # Video settings
