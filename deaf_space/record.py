@@ -4,8 +4,8 @@
 import picamera
 def record(output_file, duration):
     camera = picamera.PiCamera()
-    camera.resolution = (640, 480)
-    camera.start_recording('{}.mjpeg'.format(output_file))
+    camera.resolution = (1080, 720)
+    camera.start_recording('{}.h264'.format(output_file))
     camera.wait_recording(duration)
     camera.stop_recording()
 if __name__ == '__main__':
