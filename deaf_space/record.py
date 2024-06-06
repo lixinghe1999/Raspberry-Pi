@@ -23,8 +23,8 @@ if __name__ == '__main__':
     command_earphone = 'arecord -Dhw:1,0 -f S16_LE -r 16000 -c 2 -d {} {}.wav'.format(args.duration, output_file + '_earphone').split()
     subprocess.Popen(command_array)
     subprocess.Popen(command_earphone)
-    record(args.duration)
-
+    record(output_file, args.duration)
+    
 #     from multiprocessing import Process
 #    
 #     process_list = []
