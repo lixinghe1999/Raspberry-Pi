@@ -26,8 +26,8 @@ if __name__ == '__main__':
 
     command_array = 'arecord -Dac108 -f S32_LE -r 16000 -c 8 -d {} {}.wav'.format(args.duration, output_file + '_micarray').split()
     command_earphone = 'arecord -Dhw:1,0 -f S32_LE -r 16000 -c 2 -d {} {}.wav'.format(args.duration, output_file + '_earphone').split()
-    subprocess.run(['python3' + command_array])
-    subprocess.run(['python3' + command_earphone])
+    subprocess.run([command_array])
+    subprocess.run([command_earphone])
 
 #     from multiprocessing import Process
 #    
