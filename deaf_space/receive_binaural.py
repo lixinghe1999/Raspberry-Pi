@@ -5,8 +5,7 @@ import numpy as np
 devices = sd.query_devices()
 print(devices)
 
-sd.default.device = 0
-sd.default.channels = 2
+sd.default.device = 1
 
 def record(output_file, recording_duration=5):
     # Audio settings
