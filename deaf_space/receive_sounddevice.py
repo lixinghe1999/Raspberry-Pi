@@ -2,18 +2,11 @@ import sounddevice as sd
 import soundfile as sf
 import numpy as np
 
-devices = sd.query_devices()
-print(devices)
-
-sd.default.device = 1
-
-def record(output_file, recording_duration=5):
+def record(output_file, device=1, channels=2, recording_duration=5):
     # Audio settings
-    audio_channels = 2
-    audio_format = 'int16'
     audio_rate = 44100
     audio_frames_per_buffer = 1024
-    audio_output = output_file + '.wav'
+    audio_output = output_file + '.flac'
 
     # Initialize audio recording
     audio_frames = []
@@ -23,9 +16,9 @@ def record(output_file, recording_duration=5):
         audio_frames.append(indata.copy())
 
     # Start audio recording
-    audio_stream = sd.InputStream(channels=audio_channels,
+    audio_stream = sd.InputStream(channels=channels,
                                 samplerate=audio_rate,
-                                callback=audio_callback)
+                                callback=audio_callback, device=device)
 
     audio_stream.start()
 
