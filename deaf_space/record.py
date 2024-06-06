@@ -1,18 +1,13 @@
 # import sounddevice as sd
 # # from receive_arduino import record as record_imu
 # from receive_sounddevice import record as record_audio
-# def record(output_file, recording_duration=5):
-#     # # Video settings
-#     # video_width = 640
-#     # video_height = 480
-#     # video_output = output_file + '.mp4'
-
-#     # # Initialize video capture
-#     # video_capture = cv2.VideoCapture(0)
-#     # video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, video_width)
-#     # video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, video_height)
-#     return None
-
+import picamera
+def record(output_file, duration):
+    camera = picamera.PiCamera()
+    camera.resolution = (640, 480)
+    camera.start_recording('{}.h264'.format(output_file))
+    camera.wait_recording(duration)
+    camera.stop_recording()
 if __name__ == '__main__':
     import argparse
     import datetime
@@ -23,11 +18,12 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     output_file = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-
+    
     command_array = 'arecord -Dac108 -f S32_LE -r 16000 -c 8 -d {} {}.wav'.format(args.duration, output_file + '_micarray').split()
     command_earphone = 'arecord -Dhw:1,0 -f S16_LE -r 16000 -c 2 -d {} {}.wav'.format(args.duration, output_file + '_earphone').split()
     subprocess.Popen(command_array)
     subprocess.Popen(command_earphone)
+    record(args.duration)
 
 #     from multiprocessing import Process
 #    
