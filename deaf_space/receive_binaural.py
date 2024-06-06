@@ -1,5 +1,5 @@
 import sounddevice as sd 
-from scipy.io.wavfile import write
+import soundfile as sf
 import numpy as np
 
 devices = sd.query_devices()
@@ -39,7 +39,7 @@ def record(output_file, recording_duration=5):
 
     # Save audio recording
     audio_frames = np.concatenate(audio_frames, axis=0)
-    write(audio_output, audio_rate, audio_frames)
+    sf.write(audio_output, audio_rate, audio_frames)
     print('Audio recording saved to', audio_output)
 
 if __name__ == '__main__':
