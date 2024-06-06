@@ -5,8 +5,7 @@ import numpy as np
 devices = sd.query_devices()
 print(devices)
 
-sd.default.device = 0
-sd.default.channels = 2
+sd.default.device = 1
 
 def record(output_file, recording_duration=5):
     # Audio settings
@@ -39,7 +38,7 @@ def record(output_file, recording_duration=5):
 
     # Save audio recording
     audio_frames = np.concatenate(audio_frames, axis=0)
-    sf.write(audio_output, audio_rate, audio_frames)
+    sf.write(audio_output, audio_frames, audio_rate)
     print('Audio recording saved to', audio_output)
 
 if __name__ == '__main__':
