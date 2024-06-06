@@ -1,4 +1,3 @@
-import cv2
 import sounddevice as sd
 from receive_arduino import record as record_imu
 from receive_sounddevice import record as record_audio
